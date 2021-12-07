@@ -29,10 +29,35 @@ def main():
     gs = chess.GameState()
     load_images()
     running = True
+    # No square is selected initially. This will keep track of the last click of the user -> (row, col).
+    sq_selected = ()
+    # Keep track of the player clicks. This list will contain two tuples the first is the starting pos and the second is the ending pos.
+    player_clicks = []
     while running:
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
+            elif e.type == pg.MOUSEBUTTONDOWN:
+                location = pg.mouse.get_pos()  # (x,y) posiotion of the mouse.
+                col = location[0] // SQ_SIZE  # The x coordinate.
+                row = location[1] // SQ_SIZE  # The y coordinate.
+                if sq_selected == (row, col):
+                    # If the user selected the same square twice, deselect that square.
+                    sq_selected = ()
+                    player_clicks = []
+                else:
+                    sq_selected = (row, col)
+                    player_clicks.append(sq_selected)
+
+                if len(player_clicks) == 2:
+                    # After the second click.
+                    move = chess.Move(player_clicks[0], player_clicks[1], gs.board)
+                    print(move.get_chess_notation())  # for debugging.
+                    gs.make_move(move)
+                    # Reset user clicks.
+                    sq_selected = ()
+                    player_clicks = []
+
         draw_game_state(screen, gs)
         clock.tick(MAX_FPS)
         pg.display.flip()
