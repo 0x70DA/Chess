@@ -6,7 +6,7 @@ import pygame as pg
 import chess
 
 pg.init()  # Initialize pygame.
-WIDTH = HEIGHT = 1024
+WIDTH = HEIGHT = 512
 DIMENSION = 8  # A chess board is 8x8
 SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
