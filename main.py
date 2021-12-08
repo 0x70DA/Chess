@@ -15,8 +15,7 @@ IMAGES = {}  # Store all the images in this global dictionary only one time at t
 
 def load_images():
     """Load the images into a global dictionary."""
-    pieces = ["white_rook", "white_knight", "white_bishop", "white_queen", "white_King", "white_pawn",
-              "black_rook", "black_knight", "black_bishop", "black_queen", "black_King", "black_pawn"]
+    pieces = ["wR", "wN", "wB", "wQ", "wK", "wP", "bR", "bN", "bB", "bQ", "bK", "bP"]
     for piece in pieces:
         IMAGES[piece] = pg.transform.scale(pg.image.load(f"images/{piece}.png"), (SQ_SIZE, SQ_SIZE))
 
@@ -27,8 +26,8 @@ def main():
     clock = pg.time.Clock()
     screen.fill(pg.Color("white"))
     gs = chess.GameState()
-    valid_moves = gs.get_valid_moves() # A list to check the valid moves we have and act on them.
-    move_made = False # A variable based on we will be generating new valid moves for the new piece.
+    valid_moves = gs.get_valid_moves()  # A list to check the valid moves we have and act on them.
+    move_made = False  # A variable based on we will be generating new valid moves for the new piece.
     load_images()
     running = True
     # No square is selected initially. This will keep track of the last click of the user -> (row, col).
@@ -56,22 +55,22 @@ def main():
                     # After the second click.
                     move = chess.Move(player_clicks[0], player_clicks[1], gs.board)
                     print(move.get_chess_notation())  # for debugging.
-                    if move in valid_moves: # Only make a valid move for this piece.
+                    if move in valid_moves:  # Only make a valid move for this piece.
                         gs.make_move(move)
-                        move_made = True  # Rising a flag to that a valid move was made.
+                        move_made = True  # Raising a flag that a valid move was made.
                     # Reset user clicks.
                     sq_selected = ()
                     player_clicks = []
             # Key handler
             elif e.type == pg.KEYDOWN:
-                if e.key == pg.K_z: # On pressing the button 'z' on keyboard.
+                if e.key == pg.K_z:  # On pressing the button 'z' on keyboard.
                     gs.undo_move()
-                    move_made = True # will be important in the Ai creation later on.
+                    move_made = True  # will be important in the Ai creation later on.
 
         # Only generate new list of valid moves if a valid move was made.
         if move_made:
             valid_moves = gs.get_valid_moves()
-            move_made = False # Reset the flag.
+            move_made = False  # Reset the flag.
 
         draw_game_state(screen, gs)
         clock.tick(MAX_FPS)
