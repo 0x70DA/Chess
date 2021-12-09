@@ -58,9 +58,11 @@ def main():
                     if move in valid_moves:  # Only make a valid move for this piece.
                         gs.make_move(move)
                         move_made = True  # Raising a flag that a valid move was made.
-                    # Reset user clicks.
-                    sq_selected = ()
-                    player_clicks = []
+                        # Reset user clicks.
+                        sq_selected = ()
+                        player_clicks = []
+                    else:
+                        player_clicks = [sq_selected]
             # Key handler
             elif e.type == pg.KEYDOWN:
                 if e.key == pg.K_z:  # On pressing the button 'z' on keyboard.

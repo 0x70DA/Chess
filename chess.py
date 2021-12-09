@@ -70,10 +70,10 @@ class GameState():
                     moves.append(Move((row, col), (row - 2, col), self.board))
             # White pawns captures. "Pawns can only capture diagonally one square to the right or the left."
             if col - 1 >= 0:  # Making sure that we don't have any negative numbers.
-                if self.board[row - 1][col - 1][0] == 'b':  # Capturing a black pawn to the left.
+                if self.board[row - 1][col - 1][0] == 'b':  # Capturing a black piece to the left.
                     moves.append(Move((row, col), (row - 1, col - 1), self.board))
             if col + 1 <= 7:  # Making sure we don't cross the borders of the board
-                if self.board[row - 1][col + 1][0] == 'b':  # Capturing a black pawn to the right
+                if self.board[row - 1][col + 1][0] == 'b':  # Capturing a black piece to the right
                     moves.append(Move((row, col), (row - 1, col + 1), self.board))
         # Black pawns moves.
         else:
@@ -83,35 +83,97 @@ class GameState():
                     moves.append(Move((row, col), (row + 2, col), self.board))
             # Black pawns captures.
             if col - 1 >= 0:  # Making sure that we don't have any negative numbers.
-                if self.board[row + 1][col - 1][0] == 'w':  # Capturing a white pawn to the left.
+                if self.board[row + 1][col - 1][0] == 'w':  # Capturing a white piece to the left.
                     moves.append(Move((row, col), (row + 1, col - 1), self.board))
             if col + 1 <= 7:  # Making sure we don't cross the borders of the board
-                if self.board[row + 1][col + 1][0] == 'w':  # Capturing a white pawn to the right
+                if self.board[row + 1][col + 1][0] == 'w':  # Capturing a white piece to the right
                     moves.append(Move((row, col), (row + 1, col + 1), self.board))
+        # Add pawn promotion later.
 
     def get_rook_moves(self, row, col, moves):
         """Get all rook possible moves for the rook in location row, col and add them to the move list."""
-        pass
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))  # Moving (up, left, down, right).
+        enemy_color = "b" if self.white_to_move else "w"
+        for d in directions:
+            for i in range(1, 8):  # A rook can move one square in the four directions up to seven squares.
+                end_row = row + i * d[0]
+                end_col = col + i * d[1]
+                if 0 <= end_row < 8 and 0 <= end_col < 8:  # The piece is still in the board.
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_color:
+                        # Capture enemy piece.
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                        break
+                    else:
+                        # Friendly piece, invalid move.
+                        break
+                else:
+                    # Off board.
+                    break
 
     # Get all kinght possible moves for the knight in location row, col and add them to list.
+
     def get_knight_moves(self, row, col, moves):
         """Get all knight possible moves for the knight in location row, col and add them to the move list."""
-        pass
+        knight_moves = ((-2, -1), (-2, 1), (2, -1), (2, 1), (-1, 2), (1, 2), (-1, -2), (1, -2)
+                        )  # All posiible moves for a knight.
+        enemy_color = "b" if self.white_to_move else "w"
+        for m in knight_moves:
+            end_row = row + m[0]
+            end_col = col + m[1]
+            if 0 <= end_row < 8 and 0 <= end_col < 8:
+                end_piece = self.board[end_row][end_col]
+                if end_piece == "--" or end_piece[0] == enemy_color:
+                    # Move to empty space or capture enmey piece.
+                    moves.append(Move((row, col), (end_row, end_col), self.board))
 
     # Get all bishop possible moves for the bishop in location row, col and add them to list.
+
     def get_bishop_moves(self, row, col, moves):
         """Get all bishop possible moves for the bishop in location row, col and add them to the move list."""
-        pass
+        directions = ((-1, -1), (1, -1), (1, 1), (-1, 1))  # Moving diagonally.
+        enemy_color = "b" if self.white_to_move else "w"
+        for d in directions:
+            for i in range(1, 8):  # A bishop can move diagonally one square in the four directions up to seven squares.
+                end_row = row + i * d[0]
+                end_col = col + i * d[1]
+                if 0 <= end_row < 8 and 0 <= end_col < 8:  # The piece is still in the board.
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_color:
+                        # Capture enemy piece.
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                        break
+                    else:
+                        # Friendly piece, invalid move.
+                        break
+                else:
+                    # Off board.
+                    break
 
     # Get all queen possible moves for the queen in location row, col and add them to list.
     def get_queen_moves(self, row, col, moves):
         """Get all queen possible moves for the queen in location row, col and add them to the move list."""
-        pass
+        # Queen moves are a combination of the rook moves and the bishop moves.
+        self.get_bishop_moves(row, col, moves)
+        self.get_rook_moves(row, col, moves)
 
     # Get all king possible moves for the king in location row, col and add them to list.
     def get_king_moves(self, row, col, moves):
         """Get all king possible moves for the king in location row, col and add them to the move list."""
-        pass
+        # The king can move in any direction, but only one square.
+        king_moves = ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1))
+        enemy_color = "b" if self.white_to_move else "w"
+        for i in range(8):
+            end_row = row + king_moves[i][0]
+            end_col = col + king_moves[i][1]
+            if 0 <= end_row < 8 and 0 <= end_col < 8:
+                end_piece = self.board[end_row][end_col]
+                if end_piece == "--" or end_piece[0] == enemy_color:
+                    moves.append(Move((row, col), (end_row, end_col), self.board))
 
 
 class Move():
