@@ -29,6 +29,8 @@ class GameState():
         self.black_king_location = (0, 4)
         self.checkmate = False
         self.stalemate = False
+        # To handle en passant.
+        self.en_passant_possible = ()   # Coordinates for the possible square of enpassant.
 
     def make_move(self, move):
         """Takes a  move and excutes it."""
@@ -41,6 +43,19 @@ class GameState():
             self.white_king_location = (move.end_row, move.end_col)
         elif move.piece_moved == "bK":
             self.black_king_location = (move.end_row, move.end_col)
+        
+        # Pawn promotion.
+        if move.is_pawn_promotion:
+            self.board[move.end_row][move.end_col] = move.piece_moved[0] + "Q"
+
+        # En passant move.
+        if move.is_en_passant:
+            self.board[move.start_row][move.end_col] = '--'   # Capturing the pawn
+        # Update the en_passant_possible field.
+        if move.piece_moved[1] == 'P' and abs(move.start_row - move.end_row) == 2:   #2 square pawn advance.
+            self.en_passant_possible = ((move.start_row + move.end_row) // 2, move.start_col)   # The new location of the attacking pawn.
+        else:
+            self.en_passant_possible = ()   # Reset.
 
     def undo_move(self):
         """An undo function to undo the last move. This function will be excuted on pressing 'z'."""
@@ -55,9 +70,18 @@ class GameState():
                 self.white_king_location = (move.start_row, move.start_col)
             elif move.piece_moved == "bK":
                 self.black_king_location = (move.start_row, move.start_col)
+            # Undo en passant.
+            if move.is_en_passant:
+                self.board[move.end_row][move.end_col] = "--"   # Keeping the landing square empty.
+                self.board[move.start_row][move.end_col] = move.piece_captured   # Retruning the piece to its initial place.
+                self.en_passant_possible = (move.end_row, move.end_col)   # Reset so we can redo the move after undoing the move.
+            # Undo a 2 square pawn advance. We have to reset the en_passant_possible field to ().
+            if move.piece_moved[1] == 'P' and abs(move.start_row - move.end_row) == 2:
+                self.en_passant_possible = ()
 
     def get_valid_moves(self):
         """All moves considering checks."""
+        temp_enpassant_possible = self.en_passant_possible   # Saving the contents of the field so we can undo later.
         # 1- Get all possible move.
         moves = self.get_possible_moves()
         # 2- For each move, make the move.
@@ -82,6 +106,8 @@ class GameState():
             # Switch these flags back in case we needed to undo a move that had resulted in either of them.
             self.checkmate = False
             self.stalemate = False
+        
+        self.en_passant_possible = temp_enpassant_possible # Restoring the contents after being changed in calling make_move.
         return moves
 
     def in_check(self):
@@ -127,11 +153,22 @@ class GameState():
                     moves.append(Move((row, col), (row - 2, col), self.board))
             # White pawns captures. "Pawns can only capture diagonally one square to the right or the left."
             if col - 1 >= 0:  # Making sure that we don't have any negative numbers.
-                if self.board[row - 1][col - 1][0] == 'b':  # Capturing a black piece to the left.
+                # Capturing a black piece to the left.
+                if self.board[row - 1][col - 1][0] == 'b':  
                     moves.append(Move((row, col), (row - 1, col - 1), self.board))
+                # Tells the engine this is an en passant move.
+                elif (row - 1, col - 1) == self.en_passant_possible:   
+                    moves.append(Move((row, col), (row - 1, col - 1), self.board, en_passant = True))
+
             if col + 1 <= 7:  # Making sure we don't cross the borders of the board
-                if self.board[row - 1][col + 1][0] == 'b':  # Capturing a black piece to the right
+                # Capturing a black piece to the right
+                if self.board[row - 1][col + 1][0] == 'b':  
                     moves.append(Move((row, col), (row - 1, col + 1), self.board))
+                # Tells the engine this is an en passant move.
+                elif (row - 1, col + 1) == self.en_passant_possible:
+                    moves.append(Move((row, col), (row - 1, col + 1), self.board, en_passant = True))
+                    
+
         # Black pawns moves.
         else:
             if self.board[row + 1][col] == '--':
@@ -140,11 +177,21 @@ class GameState():
                     moves.append(Move((row, col), (row + 2, col), self.board))
             # Black pawns captures.
             if col - 1 >= 0:  # Making sure that we don't have any negative numbers.
-                if self.board[row + 1][col - 1][0] == 'w':  # Capturing a white piece to the left.
+                # Capturing a white piece to the left.
+                if self.board[row + 1][col - 1][0] == 'w':  
                     moves.append(Move((row, col), (row + 1, col - 1), self.board))
-            if col + 1 <= 7:  # Making sure we don't cross the borders of the board
-                if self.board[row + 1][col + 1][0] == 'w':  # Capturing a white piece to the right
+                # Tells the engine this is an en passant move.
+                elif (row + 1, col - 1) == self.en_passant_possible:   
+                    moves.append(Move((row, col), (row + 1, col - 1), self.board, en_passant = True))
+
+            if col + 1 <= 7:  # Making sure we don't cross the borders of the board.
+                # Capturing a white piece to the right
+                if self.board[row + 1][col + 1][0] == 'w':  
                     moves.append(Move((row, col), (row + 1, col + 1), self.board))
+                # Tells the engine this is an en passant move.
+                elif (row + 1, col + 1) == self.en_passant_possible:   
+                    moves.append(Move((row, col), (row + 1, col + 1), self.board, en_passant = True))
+
         # Add pawn promotion later.
 
     def get_rook_moves(self, row, col, moves):
@@ -240,7 +287,7 @@ class Move():
     files_to_cols = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}  # col 0 -> file a
     cols_to_files = {value: key for key, value in files_to_cols.items()}
 
-    def __init__(self, start_sq, end_sq, board):
+    def __init__(self, start_sq, end_sq, board, en_passant = False):
         self.start_row = start_sq[0]
         self.start_col = start_sq[1]
         self.end_row = end_sq[0]
@@ -249,6 +296,16 @@ class Move():
         self.piece_captured = board[self.end_row][self.end_col]
         # Giving each move a unique ID ex: e2e4 -> 6444
         self.move_id = self.start_row * 1000 + self.start_col * 100 + self.end_row * 10 + self.end_col
+
+        # To handle pawn promotion.
+        self.is_pawn_promotion = ((self.piece_moved == 'wP' and self.end_row == 0) or 
+                                 (self.piece_moved == 'bP' and self.end_row == 7))
+
+        # To handle en passant.
+        self.is_en_passant = en_passant
+        if self.is_en_passant:
+            self.piece_captured = "wP" if self.piece_moved == "bP" else "bP"
+
 
     def __eq__(self, other):
         """Overriding the equal method."""

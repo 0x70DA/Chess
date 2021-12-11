@@ -12,7 +12,6 @@ SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}  # Store all the images in this global dictionary only one time at the start of the game.
 
-
 def load_images():
     """Load the images into a global dictionary."""
     pieces = ["wR", "wN", "wB", "wQ", "wK", "wP", "bR", "bN", "bB", "bQ", "bK", "bP"]
@@ -55,13 +54,14 @@ def main():
                     # After the second click.
                     move = chess.Move(player_clicks[0], player_clicks[1], gs.board)
                     print(move.get_chess_notation())  # for debugging.
-                    if move in valid_moves:  # Only make a valid move for this piece.
-                        gs.make_move(move)
-                        move_made = True  # Raising a flag that a valid move was made.
-                        # Reset user clicks.
-                        sq_selected = ()
-                        player_clicks = []
-                    else:
+                    for i in range(len(valid_moves)):
+                        if move == valid_moves[i]:  # Only make a valid move for this piece.
+                            gs.make_move(valid_moves[i])
+                            move_made = True  # Raising a flag that a valid move was made.
+                            # Reset user clicks.
+                            sq_selected = ()
+                            player_clicks = []
+                    if not move_made:
                         player_clicks = [sq_selected]
             # Key handler
             elif e.type == pg.KEYDOWN:
