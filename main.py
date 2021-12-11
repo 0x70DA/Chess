@@ -26,6 +26,7 @@ def main():
     screen.fill(pg.Color("white"))
     gs = chess.GameState()
     valid_moves = gs.get_valid_moves()  # A list to check the valid moves we have and act on them.
+    promoted_pawn = ""
     move_made = False  # A variable based on we will be generating new valid moves for the new piece.
     load_images()
     running = True
@@ -56,7 +57,9 @@ def main():
                     print(move.get_chess_notation())  # for debugging.
                     for i in range(len(valid_moves)):
                         if move == valid_moves[i]:  # Only make a valid move for this piece.
-                            gs.make_move(valid_moves[i])
+                            if move.is_pawn_promotion:
+                                promoted_pawn = input("promote to Q, R, B, N: ")
+                            gs.make_move(valid_moves[i], promoted_pawn)
                             move_made = True  # Raising a flag that a valid move was made.
                             # Reset user clicks.
                             sq_selected = ()

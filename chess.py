@@ -32,7 +32,7 @@ class GameState():
         # To handle en passant.
         self.en_passant_possible = ()   # Coordinates for the possible square of enpassant.
 
-    def make_move(self, move):
+    def make_move(self, move, promoted_pawn = ""):
         """Takes a  move and excutes it."""
         self.board[move.start_row][move.start_col] = "--"
         self.board[move.end_row][move.end_col] = move.piece_moved
@@ -46,7 +46,7 @@ class GameState():
         
         # Pawn promotion.
         if move.is_pawn_promotion:
-            self.board[move.end_row][move.end_col] = move.piece_moved[0] + "Q"
+            self.board[move.end_row][move.end_col] = move.piece_moved[0] + promoted_pawn
 
         # En passant move.
         if move.is_en_passant:
