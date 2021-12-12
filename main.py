@@ -12,6 +12,7 @@ SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}  # Store all the images in this global dictionary only one time at the start of the game.
 
+
 def load_images():
     """Load the images into a global dictionary."""
     pieces = ["wR", "wN", "wB", "wQ", "wK", "wP", "bR", "bN", "bB", "bQ", "bK", "bP"]
