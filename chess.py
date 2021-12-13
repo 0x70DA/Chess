@@ -137,6 +137,19 @@ class GameState():
             elif move.start_col == 7:
                 # Right rook moved.
                 self.current_castling_rights.bks = False
+        # If a white rook was captured.
+        elif move.piece_captured == 'wR':
+            if move.end_row == 7:
+                if move.end_col == 0:
+                    self.current_castling_rights.wqs = False
+                elif move.end_col == 7:
+                    self.current_castling_rights.wks = False
+        elif move.piece_captured == 'bR':
+            if move.end_row == 0:
+                if move.end_col == 0:
+                    self.current_castling_rights.bqs = False
+                elif move.end_col == 7:
+                    self.current_castling_rights.bks = False
 
     def get_valid_moves(self):
         """All moves considering checks."""
