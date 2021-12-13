@@ -144,6 +144,7 @@ class GameState():
                     self.current_castling_rights.wqs = False
                 elif move.end_col == 7:
                     self.current_castling_rights.wks = False
+        # If a black rook was captured.
         elif move.piece_captured == 'bR':
             if move.end_row == 0:
                 if move.end_col == 0:
