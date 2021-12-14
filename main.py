@@ -4,6 +4,7 @@ This file is responsible for handeling user input and displaying the game.
 
 import pygame as pg
 import chess
+import chessAI
 
 pg.init()  # Initialize pygame.
 WIDTH = HEIGHT = 512
@@ -37,13 +38,20 @@ def main():
     sq_selected = ()
     # Keep track of the player clicks. This list will contain two tuples the first is the starting pos and the second is the ending pos.
     player_clicks = []
+
+    # Create two variables to indicate whether a Human or an AI is playing.
+    # If a Human is playing the variable will be set to Ture, if an AI is playing it will be set to False.
+    player_one = False  # This is for the white player.
+    player_two = False  # For the black player.
     while running:
+        is_human_turn = (gs.white_to_move and player_one) or (not gs.white_to_move and player_two)
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
             # Mouse handler
             elif e.type == pg.MOUSEBUTTONDOWN:
-                if not game_over:
+                # Allow mouse clicks only if it's a Human player's turn.
+                if not game_over and is_human_turn:
                     location = pg.mouse.get_pos()  # (x,y) posiotion of the mouse.
                     col = location[0] // SQ_SIZE  # The x coordinate.
                     row = location[1] // SQ_SIZE  # The y coordinate.
@@ -89,6 +97,12 @@ def main():
                     promoted_pawn = ""
                     game_over = False
 
+        # AI move finder.
+        if not game_over and not is_human_turn:
+            ai_move = chessAI.find_random_move(valid_moves)
+            gs.make_move(ai_move)
+            move_made = True
+            animate = True
 
         # Only generate new list of valid moves if a valid move was made.
         if move_made:
@@ -110,8 +124,6 @@ def main():
             game_over = True
             draw_text(screen, 'Stalemate!')
 
-
-
         clock.tick(MAX_FPS)
         pg.display.flip()
 
@@ -120,9 +132,10 @@ def highlight_squares(screen, gs, valid_moves, sq_selected):
     """Highlight square selected and the valid moves for the piece."""
     if sq_selected != ():   # Making sure we selected a square.
         row, col = sq_selected
-        if gs.board[row][col][0] == ('w' if gs.white_to_move else 'b'):   # Making sure we selected a piece that can be moved.
+        # Making sure we selected a piece that can be moved.
+        if gs.board[row][col][0] == ('w' if gs.white_to_move else 'b'):
             # Highlight the selected square.
-            surface = pg.Surface((SQ_SIZE,SQ_SIZE))
+            surface = pg.Surface((SQ_SIZE, SQ_SIZE))
             surface.set_alpha(100)   # Tranperancy value.
             surface.fill(pg.Color('blue'))
             screen.blit(surface, (col*SQ_SIZE, row*SQ_SIZE))
@@ -131,7 +144,6 @@ def highlight_squares(screen, gs, valid_moves, sq_selected):
             for move in valid_moves:
                 if move.start_row == row and move.start_col == col:
                     screen.blit(surface, (SQ_SIZE*move.end_col, SQ_SIZE*move.end_row))
-        
 
 
 def draw_game_state(screen, gs, valid_moves, sq_selected):
@@ -189,10 +201,11 @@ def animate_move(move, screen, board, clock):
 def draw_text(screen, text):
     font = pg.font.SysFont("Helvitca", 32, True, False)
     text_object = font.render(text, 0, pg.Color('red'))
-    text_location = pg.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH/2 - text_object.get_width()/2, HEIGHT/2 - text_object.get_height()/2)
+    text_location = pg.Rect(0, 0, WIDTH, HEIGHT).move(
+        WIDTH/2 - text_object.get_width()/2, HEIGHT/2 - text_object.get_height()/2)
     screen.blit(text_object, text_location)
-    text_object = font.render(text, 0 ,pg.Color('Black'))
-    screen.blit(text_object, text_location.move(2,2))
+    text_object = font.render(text, 0, pg.Color('Black'))
+    screen.blit(text_object, text_location.move(2, 2))
 
 
 if __name__ == "__main__":
