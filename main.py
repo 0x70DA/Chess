@@ -5,6 +5,7 @@ This file is responsible for handeling user input and displaying the game.
 import pygame as pg
 import chess
 import chessAI
+import random
 
 pg.init()  # Initialize pygame.
 WIDTH = HEIGHT = 512
@@ -100,7 +101,9 @@ def main():
         # AI move finder.
         if not game_over and not is_human_turn:
             ai_move = chessAI.find_random_move(valid_moves)
-            gs.make_move(ai_move)
+            if ai_move.is_pawn_promotion:
+                promoted_pawn = random.choice(['Q', 'B', 'R', 'N'])
+            gs.make_move(ai_move, promoted_pawn)
             move_made = True
             animate = True
 
