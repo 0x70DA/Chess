@@ -42,7 +42,7 @@ def main():
 
     # Create two variables to indicate whether a Human or an AI is playing.
     # If a Human is playing the variable will be set to Ture, if an AI is playing it will be set to False.
-    player_one = False  # This is for the white player.
+    player_one = True  # This is for the white player.
     player_two = False  # For the black player.
     while running:
         is_human_turn = (gs.white_to_move and player_one) or (not gs.white_to_move and player_two)
@@ -100,9 +100,14 @@ def main():
 
         # AI move finder.
         if not game_over and not is_human_turn:
-            ai_move = chessAI.find_random_move(valid_moves)
+            ai_move = chessAI.find_best_move(gs, valid_moves)
+            # In case the algorithm can't find the best move, choose a random move.
+            if ai_move == None:
+                ai_move = chessAI.find_random_move(valid_moves)
+
             if ai_move.is_pawn_promotion:
-                promoted_pawn = random.choice(['Q', 'B', 'R', 'N'])
+                promoted_pawn = 'Q'
+
             gs.make_move(ai_move, promoted_pawn)
             move_made = True
             animate = True

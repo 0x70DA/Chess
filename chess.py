@@ -32,6 +32,7 @@ class GameState():
         self.stalemate = False
         # To handle en passant.
         self.en_passant_possible = ()   # Coordinates for the possible square of enpassant.
+        
         self.current_castling_rights = CastleRights(True, True, True, True)
         self.castle_rights_log = [deepcopy(self.current_castling_rights)]
 
