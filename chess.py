@@ -115,6 +115,10 @@ class GameState():
                     self.board[move.end_row][move.end_col-2] = self.board[move.end_row][move.end_col+1]
                     self.board[move.end_row][move.end_col+1] = "--"
 
+            self.checkmate = False
+            self.stalemate = False
+
+            
     def update_castle_rights(self, move):
         """Update the castle rigths given the move."""
         # If the king is moved, all castling rights are lost.

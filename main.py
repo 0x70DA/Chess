@@ -100,7 +100,7 @@ def main():
 
         # AI move finder.
         if not game_over and not is_human_turn:
-            ai_move = chessAI.find_best_move(gs, valid_moves)
+            ai_move = chessAI.find_best_move_min_max(gs, valid_moves)
             # In case the algorithm can't find the best move, choose a random move.
             if ai_move == None:
                 ai_move = chessAI.find_random_move(valid_moves)
