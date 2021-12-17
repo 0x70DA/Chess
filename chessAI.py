@@ -12,7 +12,7 @@ def find_random_move(valid_moves):
 
 #def find_best_move(gs, valid_moves):
     """Find the best move based only on material using a greedy approach."""
-    turn_multiplier = 1 if gs.white_to_move else -1
+    """turn_multiplier = 1 if gs.white_to_move else -1
     opponent_min_max_score = CHECKMATE  # The minimum of all the maximum scores that the opponent has.
     best_player_move = None
     random.shuffle(valid_moves)
@@ -41,18 +41,19 @@ def find_random_move(valid_moves):
             opponent_min_max_score = opponent_max_score
             best_player_move = player_move
         gs.undo_move()
-    return best_player_move
+    return best_player_move"""
 
 
-def find_best_move_min_max(gs, valid_moves):
-    """This function will make the first recursive call for the minmax algorithm."""
+def find_best_move(gs, valid_moves):
+    """This function will make the first recursive call for the negamax algorithm."""
     global next_move
     next_move = None
-    find_move_min_max(gs, valid_moves, DEPTH, gs.white_to_move)
+    random.shuffle(valid_moves)
+    find_move_nega_max_alpha_beta(gs, valid_moves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.white_to_move else -1)
     return next_move
 
-def find_move_min_max(gs, valid_moves, depth, white_to_move):
-    global next_move
+#def find_move_min_max(gs, valid_moves, depth, white_to_move):
+    """global next_move
     if depth == 0:
         return score_material(gs.board)
     
@@ -80,10 +81,53 @@ def find_move_min_max(gs, valid_moves, depth, white_to_move):
                 if depth == DEPTH:
                     next_move = move
             gs.undo_move()
-        return min_score
+        return min_score"""
+
+
+#def find_move_nega_max(gs, valid_moves, depth, turn_multiplier):
+    """We will look for max score, then multipli it by -1 when it's black's turn."""
+    """global next_move
+    if depth == 0:
+        return turn_multiplier * score_board(gs)
+    max_score = -CHECKMATE
+    for move in valid_moves:
+        gs.make_move(move)
+        next_moves = gs.get_valid_moves()
+        score = -find_move_nega_max(gs, next_moves, depth-1, -turn_multiplier)   # Will negate opponent's max score.
+        if score > max_score:
+            max_score = score
+            if depth == DEPTH:
+                next_move = move
+        gs.undo_move()
+    return max_score"""
+
+
+def find_move_nega_max_alpha_beta(gs, valid_moves, depth, alpha, beta, turn_multiplier):
+    """We will look for max score, then multipli it by -1 when it's black's turn."""
+    global next_move
+    if depth == 0:
+        return turn_multiplier * score_board(gs)
+    
+    # move ordering - implement late.
+
+    max_score = -CHECKMATE
+    for move in valid_moves:
+        gs.make_move(move)
+        next_moves = gs.get_valid_moves()
+        score = -find_move_nega_max_alpha_beta(gs, next_moves, depth-1, -beta, -alpha,  -turn_multiplier)   # Will negate opponent's max score.
+        if score > max_score:
+            max_score = score
+            if depth == DEPTH:
+                next_move = move
+        gs.undo_move()
+        if max_score > alpha:   # Pruning. Neglecting unnecessary position calculations.
+            alpha = max_score
+        if alpha >= beta:   # We reached the best possible score. no need to calculate further more.
+            break
+    return max_score
+
 
     
-# This function will be useful later making our Ai smarter.
 def score_board(gs):
     """Positive score is better for white while negative score is better for black."""
     if gs.checkmate:
@@ -106,9 +150,9 @@ def score_board(gs):
                 score -= PIECE_SCORE[square[1]]
     return score
 
-def score_material(board):
+#def score_material(board):
     """Score the board based on material alone not considering the position."""
-    score = 0
+    """score = 0
     for row in board:
         for square in row:
             if square[0] == 'w':
@@ -118,4 +162,4 @@ def score_material(board):
             elif square[0] == 'b':
                 # Black is trying to minimize the score.
                 score -= PIECE_SCORE[square[1]]
-    return score
+    return score"""

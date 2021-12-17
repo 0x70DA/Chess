@@ -100,7 +100,7 @@ def main():
 
         # AI move finder.
         if not game_over and not is_human_turn:
-            ai_move = chessAI.find_best_move_min_max(gs, valid_moves)
+            ai_move = chessAI.find_best_move(gs, valid_moves)
             # In case the algorithm can't find the best move, choose a random move.
             if ai_move == None:
                 ai_move = chessAI.find_random_move(valid_moves)
@@ -187,7 +187,7 @@ def animate_move(move, screen, board, clock):
     global colors
     delta_row = move.end_row - move.start_row
     delta_col = move.end_col - move.start_col
-    frames_per_square = 1   # Frames to move one square.
+    frames_per_square = 3   # Frames to move one square.
     frame_count = (abs(delta_row) + abs(delta_col)) * frames_per_square
     for frame in range(frame_count + 1):
         row, col = (move.start_row + delta_row*frame/frame_count, move.start_col + delta_col*frame/frame_count)
