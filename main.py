@@ -8,6 +8,7 @@ import chessAI
 import random
 
 pg.init()  # Initialize pygame.
+pg.display.set_caption("Chess")
 WIDTH = HEIGHT = 512
 DIMENSION = 8  # A chess board is 8x8
 SQ_SIZE = HEIGHT // DIMENSION

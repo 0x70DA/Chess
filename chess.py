@@ -115,6 +115,7 @@ class GameState():
                     self.board[move.end_row][move.end_col-2] = self.board[move.end_row][move.end_col+1]
                     self.board[move.end_row][move.end_col+1] = "--"
 
+            # Undo checkmates and stalemates.
             self.checkmate = False
             self.stalemate = False
 
