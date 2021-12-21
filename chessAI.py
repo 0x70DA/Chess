@@ -42,7 +42,7 @@ ROOK_SCORES = [
     [4, 4, 4, 4, 4, 4, 4, 4],
     [4, 3, 4, 4, 4, 4, 3, 4]
 ]
-WPAWN_SCORES = [
+WHITE_PAWN_SCORES = [
     [9, 9, 9, 9, 9, 9, 9, 9],
     [8, 8, 8, 8, 8, 8, 8, 8],
     [5, 6, 6, 7, 7, 6, 6, 5],
@@ -52,7 +52,7 @@ WPAWN_SCORES = [
     [1, 1, 1, 0, 0, 1, 1, 1],
     [0, 0, 0, 0, 0, 0, 0, 0]
 ]
-BPAWN_SCORES = [
+BLACK_PAWN_SCORES = [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 0, 0, 1, 1, 1],
     [1, 1, 2, 3, 3, 2, 1, 1],
@@ -63,7 +63,7 @@ BPAWN_SCORES = [
     [9, 9, 9, 9, 9, 9, 9, 9]
 ]
 PIECE_POSITION_SCORES = {'N': KNIGHT_SCORES, 'Q': QUEEN_SCORES,
-                         'B': BISHOP_SCORES, 'R': ROOK_SCORES, 'wP': WPAWN_SCORES, 'bP': BPAWN_SCORES}
+                         'B': BISHOP_SCORES, 'R': ROOK_SCORES, 'wP': WHITE_PAWN_SCORES, 'bP': BLACK_PAWN_SCORES}
 CHECKMATE = 1000  # Highest score.
 STALEMATE = 0  # Better than losing, but not as good as checkmate.
 DEPTH = 3   # How deep we want to go into the game moves.
@@ -108,13 +108,13 @@ def find_random_move(valid_moves):
     return best_player_move"""
 
 
-def find_best_move(gs, valid_moves):
+def find_best_move(gs, valid_moves, return_queue):
     """This function will make the first recursive call for the negamax algorithm."""
     global next_move
     next_move = None
     random.shuffle(valid_moves)
     find_move_nega_max_alpha_beta(gs, valid_moves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.white_to_move else -1)
-    return next_move
+    return_queue.put(next_move)
 
 # def find_move_min_max(gs, valid_moves, depth, white_to_move):
     """global next_move

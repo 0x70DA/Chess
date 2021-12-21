@@ -6,6 +6,7 @@ import pygame as pg
 import chess
 import chessAI
 import random
+from multiprocessing import Process, Queue
 
 pg.init()  # Initialize pygame.
 pg.display.set_caption("Chess")
@@ -45,6 +46,9 @@ def main():
     # If a Human is playing the variable will be set to Ture, if an AI is playing it will be set to False.
     player_one = True  # This is for the white player.
     player_two = False  # For the black player.
+    AI_thinking = False
+    move_finder_process = None
+    move_undone = False
     while running:
         is_human_turn = (gs.white_to_move and player_one) or (not gs.white_to_move and player_two)
         for e in pg.event.get():
@@ -53,7 +57,7 @@ def main():
             # Mouse handler
             elif e.type == pg.MOUSEBUTTONDOWN:
                 # Allow mouse clicks only if it's a Human player's turn.
-                if not game_over and is_human_turn:
+                if not game_over:
                     location = pg.mouse.get_pos()  # (x,y) posiotion of the mouse.
                     col = location[0] // SQ_SIZE  # The x coordinate.
                     row = location[1] // SQ_SIZE  # The y coordinate.
@@ -65,7 +69,7 @@ def main():
                         sq_selected = (row, col)
                         player_clicks.append(sq_selected)
 
-                    if len(player_clicks) == 2:
+                    if len(player_clicks) == 2 and is_human_turn:
                         # After the second click.
                         move = chess.Move(player_clicks[0], player_clicks[1], gs.board)
                         print(move.get_chess_notation())  # for debugging.
@@ -88,6 +92,10 @@ def main():
                     move_made = True  # will be important in the Ai creation later on.
                     animate = False
                     game_over = False
+                    if AI_thinking:
+                        move_finder_process.terminate()
+                        AI_thinking = False
+                    move_undone = True
                 # Resetting the game.
                 if e.key == pg.K_r:
                     gs = chess.GameState()
@@ -98,20 +106,34 @@ def main():
                     animate = False
                     promoted_pawn = ""
                     game_over = False
+                    if AI_thinking:
+                        move_finder_process.terminate()
+                        AI_thinking = False
+                    move_undone = True
 
         # AI move finder.
-        if not game_over and not is_human_turn:
-            ai_move = chessAI.find_best_move(gs, valid_moves)
-            # In case the algorithm can't find the best move, choose a random move.
-            if ai_move == None:
-                ai_move = chessAI.find_random_move(valid_moves)
+        if not game_over and not is_human_turn and not move_undone:
+            if not AI_thinking:
+                AI_thinking = True
+                print("Thinking...")
+                return_queue = Queue()  # This is used to pass data between threads.
+                move_finder_process = Process(target=chessAI.find_best_move, args=(gs, valid_moves, return_queue))
+                move_finder_process.start()  # call find_best_move(gs, valid_moves, return_queue)
 
-            if ai_move.is_pawn_promotion:
-                promoted_pawn = 'Q'
+            if not move_finder_process.is_alive():
+                print("Done thinking.")
+                ai_move = return_queue.get()
+                # In case the algorithm can't find the best move, choose a random move.
+                if ai_move == None:
+                    ai_move = chessAI.find_random_move(valid_moves)
 
-            gs.make_move(ai_move, promoted_pawn)
-            move_made = True
-            animate = True
+                if ai_move.is_pawn_promotion:
+                    promoted_pawn = 'Q'
+
+                gs.make_move(ai_move, promoted_pawn)
+                move_made = True
+                animate = True
+                AI_thinking = False
 
         # Only generate new list of valid moves if a valid move was made.
         if move_made:
@@ -120,6 +142,7 @@ def main():
             valid_moves = gs.get_valid_moves()
             move_made = False  # Reset the flag.
             animate = False
+            move_undone = False
 
         draw_game_state(screen, gs, valid_moves, sq_selected)
 
