@@ -66,7 +66,7 @@ PIECE_POSITION_SCORES = {'N': KNIGHT_SCORES, 'Q': QUEEN_SCORES,
                          'B': BISHOP_SCORES, 'R': ROOK_SCORES, 'wP': WHITE_PAWN_SCORES, 'bP': BLACK_PAWN_SCORES}
 CHECKMATE = 1000  # Highest score.
 STALEMATE = 0  # Better than losing, but not as good as checkmate.
-DEPTH = 3   # How deep we want to go into the game moves.
+DEPTH = 1   # How deep we want to go into the game moves.
 
 
 def find_random_move(valid_moves):
@@ -133,7 +133,6 @@ def find_best_move(gs, valid_moves, return_queue):
                     next_move = move
             gs.undo_move()
         return max_score
-
     else:   # We want to minimize the score.
         min_score = CHECKMATE
         for move in valid_moves:
@@ -176,7 +175,7 @@ def find_move_nega_max_alpha_beta(gs, valid_moves, depth, alpha, beta, turn_mult
 
     max_score = -CHECKMATE
     for move in valid_moves:
-        gs.make_move(move)
+        gs.make_move(move, promoted_pawn='Q')
         next_moves = gs.get_valid_moves()
         # Will negate opponent's max score.
         score = -find_move_nega_max_alpha_beta(gs, next_moves, depth-1, -beta, -alpha,  -turn_multiplier)

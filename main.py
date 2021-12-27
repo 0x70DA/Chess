@@ -44,7 +44,7 @@ def main():
 
     # Create two variables to indicate whether a Human or an AI is playing.
     # If a Human is playing the variable will be set to Ture, if an AI is playing it will be set to False.
-    player_one = True  # This is for the white player.
+    player_one = False  # This is for the white player.
     player_two = False  # For the black player.
     AI_thinking = False
     move_finder_process = None
